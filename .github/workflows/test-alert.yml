@@ -1,0 +1,20 @@
+name: Test d'alerte ntfy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Envoyer une fausse alerte
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then echo "Secret NTFY_TOPIC absent"; exit 1; fi
+          curl -sS --fail -H "Title: TEST - iPhone Duo Blanc 256 Go disponible" \
+            -H "Priority: 5" -H "Tags: iphone,test_tube" \
+            -H "Click: https://www.apple.com/fr/shop/buy-iphone/iphone-duo" \
+            -d "Fausse alerte de test : si tu lis ceci, l'agent sait te prévenir." \
+            "https://ntfy.sh/$NTFY_TOPIC" > /dev/null && echo "Notification envoyée"
