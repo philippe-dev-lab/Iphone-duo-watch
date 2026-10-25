@@ -1,0 +1,30 @@
+name: Stock iPhone Duo — vérification toutes les 5 min
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: stock-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+
+      # Mémorise les magasins déjà notifiés pour n'alerter qu'une fois par passage en stock
+      - uses: actions/cache@v4
+        with:
+          path: .duo-state.json
+          key: duo-state-${{ github.run_id }}
+          restore-keys: duo-state-
+
+      - name: Vérifier le stock et notifier
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          APPLE_PART: MK2D4F/A
+        run: python3 check_stock.py || true
