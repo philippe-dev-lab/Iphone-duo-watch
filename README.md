@@ -1,12 +1,15 @@
-# Veille stock iPhone Duo — Blanc stellaire 256 Go — Apple Store Île-de-France
+# Veille stock iPhone Duo 256 Go (Blanc stellaire + Ciel nocturne) — Apple Store Île-de-France
 
 Interroge l'endpoint public d'apple.com qui alimente le bouton « Vérifier la disponibilité »
 (`/fr/shop/retail/pickup-message`) et envoie un push sur ton iPhone via **ntfy** dès qu'un
 des 9 Apple Store d'IDF (Opéra, Marché Saint-Germain, Champs-Élysées, Les Quatre Temps,
 Rosny 2, Vélizy 2, Parly 2, Carré Sénart, Val d'Europe) a le modèle en retrait.
 
-Référence France du modèle : **MK2D4F/A** (iPhone Duo, Blanc stellaire, 256 Go, 2 339 €).
-Autres références FR : MK2E4F/A (Ciel nocturne 256), MK2F4F/A (Blanc 512), MK2H4F/A (Blanc 1 To), MK2K4F/A (Blanc 2 To).
+Références surveillées (variable `APPLE_PARTS`) : **MK2D4F/A** (Blanc stellaire 256 Go) et **MK2E4F/A** (Ciel nocturne 256 Go), 2 339 €.
+Autres références FR : MK2F4F/A (Blanc 512), MK2G4F/A (Noir 512), MK2H4F/A (Blanc 1 To), MK2K4F/A (Blanc 2 To).
+
+Cadence : chaque run GitHub Actions boucle ~5h40 en vérifiant toutes les 3 min, puis se relance lui-même
+(les déclenchements planifiés de GitHub seuls sont trop irréguliers).
 
 ## Mise en route (5 minutes)
 

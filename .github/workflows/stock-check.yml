@@ -1,9 +1,16 @@
-name: Stock iPhone Duo — vérification toutes les 5 min
+name: Stock iPhone Duo — veille continue
 
+# Les déclenchements "schedule" de GitHub sont très irréguliers (parfois 1 toutes les 3-4 h).
+# Chaque run boucle donc ~5h40 en vérifiant toutes les 3 min, puis se relance lui-même.
+# Le schedule ne sert que de filet de sécurité si la chaîne s'interrompt.
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/15 * * * *"
   workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
 
 concurrency:
   group: stock-check
@@ -12,7 +19,7 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 355
     steps:
       - uses: actions/checkout@v4
 
@@ -23,8 +30,16 @@ jobs:
           key: duo-state-${{ github.run_id }}
           restore-keys: duo-state-
 
-      - name: Vérifier le stock et notifier
+      - name: Vérifier le stock en continu (toutes les 3 min, ~5h40)
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-          APPLE_PART: MK2D4F/A
-        run: python3 check_stock.py || true
+          PYTHONUNBUFFERED: "1"
+        run: python3 check_stock.py --watch 180 --duration 20400 || true
+
+      - name: Relancer la veille
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api -X POST "repos/${{ github.repository }}/actions/workflows/stock-check.yml/dispatches" -f ref=main \
+            && echo "Run suivant lancé"
