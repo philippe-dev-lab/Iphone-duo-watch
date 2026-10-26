@@ -1,0 +1,13 @@
+name: Diagnostic des références
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Interroger Apple pour chaque référence
+        run: python3 check_stock.py --diag

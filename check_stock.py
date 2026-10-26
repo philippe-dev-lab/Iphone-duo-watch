@@ -51,6 +51,21 @@ def parse(data):
     return out
 
 
+def diag(location="75001"):
+    """Annotations GitHub : ce qu'Apple renvoie pour chaque référence."""
+    data = fetch(location)
+    stores = data.get("body", {}).get("stores", [])
+    for part, label in PARTS.items():
+        found = [s for s in stores if part in s.get("partsAvailability", {})]
+        avail = [s["storeName"] for s in found if s["partsAvailability"][part].get("pickupDisplay") == "available"]
+        sample = found[0]["partsAvailability"][part] if found else {}
+        desc = (sample.get("messageTypes", {}).get("regular", {}).get("storePickupProductTitle")
+                or sample.get("storePickupProductTitle") or "")
+        print(f"::notice title={label} ({part})::reconnu dans {len(found)}/{len(stores)} magasins ; "
+              f"disponible : {', '.join(avail) or 'aucun'} ; produit Apple : {desc or '?'} ; "
+              f"exemple : {sample.get('pickupDisplay')} / {sample.get('pickupSearchQuote')}")
+
+
 def check():
     results = {}
     for loc in LOCATIONS:
@@ -115,7 +130,10 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--watch", type=int, metavar="SECONDES", help="re-vérifie en boucle")
     ap.add_argument("--duration", type=int, metavar="SECONDES", help="durée max de la boucle")
+    ap.add_argument("--diag", action="store_true", help="diagnostic par référence")
     a = ap.parse_args()
+    if a.diag:
+        diag(); sys.exit(0)
     if not a.watch:
         sys.exit(run_once())
     end = time.time() + a.duration if a.duration else None
